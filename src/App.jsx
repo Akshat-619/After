@@ -50,6 +50,7 @@ function App() {
 
     if (audio) {
       audio.muted = false;
+      setIsMuted(false);
 
       try {
         await audio.play();
@@ -81,6 +82,7 @@ function App() {
 
   async function togglePlayback() {
     const audio = audioRef.current;
+
     if (!audio) return;
 
     if (audio.paused) {
@@ -98,10 +100,19 @@ function App() {
 
   function toggleMute() {
     const audio = audioRef.current;
+
     if (!audio) return;
 
     audio.muted = !audio.muted;
     setIsMuted(audio.muted);
+  }
+
+  function toggleSettings() {
+    setSettingsOpen((previous) => !previous);
+  }
+
+  function collapseSettings() {
+    setSettingsOpen(false);
   }
 
   function seekAudio(event) {
@@ -137,7 +148,7 @@ function App() {
     <>
       <div className="grain" aria-hidden="true" />
 
-      {/* Narration */}
+      {/* Background narration */}
       <audio
         ref={audioRef}
         src={afterStory}
@@ -160,7 +171,7 @@ function App() {
         }}
       />
 
-      {/* Welcome popup: first screen on every refresh */}
+      {/* Minimal welcome popup */}
       {showWelcome && (
         <div className="story-overlay">
           <section
@@ -223,12 +234,12 @@ function App() {
         </div>
       )}
 
-      {/* Loader appears after the welcome interaction */}
+      {/* Loader after the welcome interaction */}
       {loading && (
         <Loader onComplete={() => setLoading(false)} />
       )}
 
-      {/* Main website */}
+      {/* Existing website sections */}
       <Navbar />
 
       <main id="top">
@@ -240,7 +251,7 @@ function App() {
 
       <Footer />
 
-      {/* Compact, collapsible audio player */}
+      {/* Capsule-style audio player */}
       {audioEnabled && (
         <section
           className="story-player story-player--collapsible"
@@ -267,21 +278,24 @@ function App() {
                 <span className="story-player__title">
                   THE AFTER STORY
                 </span>
+
                 <span className="story-player__subtitle">
                   A moment to feel
                 </span>
               </div>
             </div>
 
-            {/* Gear: opens and closes the controls */}
+            {/* Settings gear */}
             <button
               type="button"
-              className="story-player__gear"
+              className={`story-player__gear ${
+                settingsOpen ? "is-active" : ""
+              }`}
               aria-label={
                 settingsOpen ? "Close audio controls" : "Open audio controls"
               }
               aria-expanded={settingsOpen}
-              onClick={() => setSettingsOpen((value) => !value)}
+              onClick={toggleSettings}
             >
               <svg
                 viewBox="0 0 24 24"
@@ -300,7 +314,7 @@ function App() {
             </button>
           </div>
 
-          {/* Always-visible progress bar */}
+          {/* Timeline */}
           <input
             className="story-player__seek"
             type="range"
@@ -322,13 +336,13 @@ function App() {
             <span>{formatTime(duration)}</span>
           </div>
 
-          {/* Exactly three icons in the collapsible bar */}
+          {/* Three icons inside the expanding capsule */}
           <div
             className={`story-player__settings ${
               settingsOpen ? "is-open" : ""
             }`}
           >
-            {/* 1. Mute / unmute */}
+            {/* Mute / unmute */}
             <button
               type="button"
               className="story-player__control-icon"
@@ -370,7 +384,7 @@ function App() {
               )}
             </button>
 
-            {/* 2. Play / pause */}
+            {/* Play / pause */}
             <button
               type="button"
               className="story-player__control-icon story-player__control-play"
@@ -402,11 +416,11 @@ function App() {
               )}
             </button>
 
-            {/* 3. Collapse controls */}
+            {/* Collapse */}
             <button
               type="button"
               className="story-player__control-icon"
-              onClick={() => setSettingsOpen(false)}
+              onClick={collapseSettings}
               aria-label="Collapse audio controls"
               title="Collapse"
             >
